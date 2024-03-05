@@ -1,4 +1,5 @@
 from pytypecho import Typecho, Post
+from datetime import datetime
 from urllib.parse import urlparse
 import frontmatter
 import time
@@ -67,25 +68,28 @@ def get_posts():
     return post_link_id_list
 
 # 创建post对象
-def create_post_obj(title, content, link, post_status, terms_names_post_tag, terms_names_category):
+def create_post_obj(title, content, link, post_status, terms_names_post_tag, terms_names_category, date):
     post_obj = Post(title=title, 
                 description=content, 
                 slug=link,
                 post_status=post_status, 
                 mt_keywords=terms_names_post_tag, 
-                categories=terms_names_category
+                categories=terms_names_category,
+                dateCreated=date
                 )
     return post_obj
 
 # 新建文章
-def new_post(title, content, link, post_status, terms_names_post_tag, terms_names_category):
+def new_post(title, content, link, post_status, terms_names_post_tag, terms_names_category, date):
     post_obj = create_post_obj(
         title = title, 
         content = content, 
         link = link, 
         post_status = post_status, 
         terms_names_post_tag = terms_names_post_tag, 
-        terms_names_category = terms_names_category)
+        terms_names_category = terms_names_category,
+        date=date
+        )
     # 创建文章并获取响应结果
     res = te.new_post(post_obj, True)
     # 判断是否创建成功
@@ -97,14 +101,16 @@ def new_post(title, content, link, post_status, terms_names_post_tag, terms_name
         return FAIL 
 
 # 更新文章
-def edit_post(id, title, content, link, post_status, terms_names_post_tag, terms_names_category):
+def edit_post(id, title, content, link, post_status, terms_names_post_tag, terms_names_category, date):
     post_obj = create_post_obj(
         title, 
         content, 
         link, 
         post_status, 
         terms_names_post_tag, 
-        terms_names_category)
+        terms_names_category,
+        date
+        )
     res = te.edit_post(post_obj, post_id=int(id), publish=True)
     # 判断是否修改成功
     if res and isinstance(res, int) and res == int(id):
@@ -263,6 +269,9 @@ def main():
             terms_names_post_tag = metadata.get("tags",  domain_name)
             terms_names_post_tag = ', '.join(terms_names_post_tag)
             terms_names_category = metadata.get("categories", domain_name)
+            publish_date = metadata.get("date", "")
+            if not publish_date:
+                publish_date = datetime.now()
             post_status = "publish"
             link = urllib.parse.quote(sha1_key , safe='').lower() 
             # content = markdown.markdown(content + href_info("https://"+domain_name+"/p/"+link+"/"), extensions=['tables', 'fenced_code'])
@@ -272,7 +281,7 @@ def main():
             print("=== "+post_url+" ===")
             if((post_url in link_id_dic.keys()) == False):
                 print("=== 创建文章开始: "+post_url+" ===")
-                res = new_post(title, content, link, post_status, terms_names_post_tag, terms_names_category)
+                res = new_post(title, content, link, post_status, terms_names_post_tag, terms_names_category, publish_date)
                 print("new_post==>>", {
                     "title": title, 
                     "content": content[:10] + "...", 
@@ -294,7 +303,7 @@ def main():
                 # 获取id
                 id = link_id_dic[post_url]
                 print("=== 文章ID: "+id+" ===")
-                res = edit_post(id, title, content, link, post_status, terms_names_post_tag, terms_names_category)
+                res = edit_post(id, title, content, link, post_status, terms_names_post_tag, terms_names_category, publish_date)
                 print("edit_post==>>", {
                     "id": id, 
                     "title": title, 
