@@ -118,6 +118,4 @@ categories:
 ## 目录(2025年01月03日更新)
 [思い出すだけで笑う](https://www.misstwo.top/index.php/p/post001/)
 
-[建立个人独立博客有什么好处?](https://www.misstwo.top/index.php/p/2020-01-18-blog/)
-
 ---end---
